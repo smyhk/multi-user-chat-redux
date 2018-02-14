@@ -89,6 +89,7 @@ public class Login extends JFrame {
 		contentPane.add(lblPort);
 		
 		txtPort = new JTextField();
+		txtPort.setText("1");
 		txtPort.setToolTipText("IP Address");
 		txtPort.setColumns(10);
 		txtPort.setBounds(61, 186, 177, 26);
