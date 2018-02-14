@@ -10,6 +10,8 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class Login extends JFrame {
 
@@ -93,7 +95,25 @@ public class Login extends JFrame {
 		contentPane.add(txtPort);
 		
 		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO: add validations
+				String name = txtName.getText();
+				String address = txtAddress.getText();
+				int port  = Integer.parseInt(txtPort.getText());
+				
+				login(name, address, port);
+			}
+		});
 		btnLogin.setBounds(91, 251, 117, 29);
 		contentPane.add(btnLogin);
+	}
+	
+	/**
+	 * Login stuff goes here
+	 */
+	private void login(String name, String address, int port) {
+		dispose(); // closes the current window, not application
+		new Client(name, address, port);
 	}
 }
