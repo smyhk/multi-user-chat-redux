@@ -2,7 +2,10 @@ package com.smyhktech.mudchatter;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
+
 import java.awt.GridBagLayout;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -25,7 +28,8 @@ public class Client extends JFrame {
 	private String name, address;
 	private int port;
 	private JTextField txtMessage;
-	JTextArea txtrHistory;
+	private JTextArea chatHistory;
+	private DefaultCaret caret;
 	
 	/**
 	 * Create the frame.
@@ -64,19 +68,23 @@ public class Client extends JFrame {
 		gbl_contentPane.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
-		txtrHistory = new JTextArea();
-		txtrHistory.setEditable(false);
-		GridBagConstraints gbc_txtrHistory = new GridBagConstraints();
-		gbc_txtrHistory.insets = new Insets(0, 5, 5, 5);
-		gbc_txtrHistory.fill = GridBagConstraints.BOTH;
-		gbc_txtrHistory.gridx = 1;
-		gbc_txtrHistory.gridy = 1;
-		gbc_txtrHistory.gridwidth = 2;
-		//gbc_txtrHistory.insets = new Insets(0, 5, 0, 0);
-		contentPane.add(txtrHistory, gbc_txtrHistory);
+		chatHistory = new JTextArea();
+		chatHistory.setEditable(false);
+		JScrollPane scroll = new JScrollPane(chatHistory);
+		caret = (DefaultCaret) chatHistory.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		GridBagConstraints scrollConstraints = new GridBagConstraints();
+		scrollConstraints.insets = new Insets(0, 5, 5, 5);
+		scrollConstraints.fill = GridBagConstraints.BOTH;
+		scrollConstraints.gridx = 0;
+		scrollConstraints.gridy = 0;
+		scrollConstraints.gridwidth = 3;
+		scrollConstraints.gridheight = 2;
+		contentPane.add(scroll, scrollConstraints);
 		
 		txtMessage = new JTextField();
 		txtMessage.addKeyListener(new KeyAdapter() {
+			// Send text to the chat when Enter key is pressed
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -87,8 +95,9 @@ public class Client extends JFrame {
 		GridBagConstraints gbc_txtMessage = new GridBagConstraints();
 		gbc_txtMessage.insets = new Insets(0, 0, 0, 5);
 		gbc_txtMessage.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtMessage.gridx = 1;
+		gbc_txtMessage.gridx = 0;
 		gbc_txtMessage.gridy = 2;
+		gbc_txtMessage.gridwidth = 2;
 		contentPane.add(txtMessage, gbc_txtMessage);
 		txtMessage.setColumns(10);
 		
@@ -105,7 +114,7 @@ public class Client extends JFrame {
 		contentPane.add(btnSend, gbc_btnSend);
 		setVisible(true);
 		
-		//automatically give focus to the text entry window
+		// Automatically give focus to the text entry window
 		txtMessage.requestFocusInWindow();
 	}
 	
@@ -118,7 +127,9 @@ public class Client extends JFrame {
 	}
 	
 	public void console(String message) {
-		txtrHistory.append(message + "\n\r");
+		chatHistory.append(message + "\n\r");
+		// TODO: research this...
+		//chatHistory.setCaretPosition();
 	}
 
 }
