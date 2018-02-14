@@ -12,6 +12,10 @@ import java.awt.GridBagConstraints;
 import javax.swing.JButton;
 import java.awt.Insets;
 import javax.swing.JTextField;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Client extends JFrame {
 
@@ -21,6 +25,7 @@ public class Client extends JFrame {
 	private String name, address;
 	private int port;
 	private JTextField txtMessage;
+	JTextArea txtrHistory;
 	
 	/**
 	 * Create the frame.
@@ -32,6 +37,8 @@ public class Client extends JFrame {
 		this.port = port;
 		
 		createWindow();
+		
+		console("Attempting connection to: " + address + ":" + port + ", user: " + name);
 	}
 	
 	private void createWindow() {
@@ -57,7 +64,7 @@ public class Client extends JFrame {
 		gbl_contentPane.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
-		JTextArea txtrHistory = new JTextArea();
+		txtrHistory = new JTextArea();
 		txtrHistory.setEditable(false);
 		GridBagConstraints gbc_txtrHistory = new GridBagConstraints();
 		gbc_txtrHistory.insets = new Insets(0, 5, 5, 5);
@@ -69,6 +76,14 @@ public class Client extends JFrame {
 		contentPane.add(txtrHistory, gbc_txtrHistory);
 		
 		txtMessage = new JTextField();
+		txtMessage.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					send(txtMessage.getText());
+				}
+			}
+		});
 		GridBagConstraints gbc_txtMessage = new GridBagConstraints();
 		gbc_txtMessage.insets = new Insets(0, 0, 0, 5);
 		gbc_txtMessage.fill = GridBagConstraints.HORIZONTAL;
@@ -78,6 +93,11 @@ public class Client extends JFrame {
 		txtMessage.setColumns(10);
 		
 		JButton btnSend = new JButton("Send");
+		btnSend.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				send(txtMessage.getText());
+			}
+		});
 		GridBagConstraints gbc_btnSend = new GridBagConstraints();
 		gbc_btnSend.insets = new Insets(0, 0, 0, 5);
 		gbc_btnSend.gridx = 2;
@@ -85,8 +105,20 @@ public class Client extends JFrame {
 		contentPane.add(btnSend, gbc_btnSend);
 		setVisible(true);
 		
-		//automatically give focus to the text entering window
+		//automatically give focus to the text entry window
 		txtMessage.requestFocusInWindow();
+	}
+	
+	private void send(String message) {
+		// Ignore blank messages
+		if (message.equals("")) return;
+		message = name + ": " + message;
+		console(message);
+		txtMessage.setText("");
+	}
+	
+	public void console(String message) {
+		txtrHistory.append(message + "\n\r");
 	}
 
 }
