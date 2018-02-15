@@ -1,24 +1,29 @@
 package com.smyhktech.mudchatter;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.text.DefaultCaret;
-
-import java.awt.GridBagLayout;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
-import java.awt.GridBagConstraints;
-import javax.swing.JButton;
-import java.awt.Insets;
-import javax.swing.JTextField;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 
 public class Client extends JFrame {
 
@@ -31,6 +36,9 @@ public class Client extends JFrame {
 	private JTextArea chatHistory;
 	private DefaultCaret caret;
 	
+	private DatagramSocket socket;
+	private InetAddress ip;
+	
 	/**
 	 * Create the frame.
 	 */
@@ -40,9 +48,40 @@ public class Client extends JFrame {
 		this.address = address;
 		this.port = port;
 		
-		createWindow();
+		boolean connect = openConnection(address, port);
+		if (!connect) {
+			String msg = "Connection failed!";
+			System.err.println(msg);
+			console(msg);
+		}
 		
+		createWindow();
 		console("Attempting connection to: " + address + ":" + port + ", user: " + name);
+	}
+	
+	private boolean openConnection(String address, int port) {
+		try {
+			socket = new DatagramSocket(port);
+			ip = InetAddress.getByName(address);
+		} catch (UnknownHostException | SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	private String receive() {
+		DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length);
+		
+		try {
+			socket.receive(packet);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String message = new String(packet.getData());
+		return message;
 	}
 	
 	private void createWindow() {
