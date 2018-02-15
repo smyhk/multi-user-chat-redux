@@ -66,8 +66,8 @@ public class Server implements Runnable {
 					process(packet);
 					
 					// Quick test for ServerClient
-					clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 50));
-					System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
+					// clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 50));
+					// System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
 				}
 			}
 		};
@@ -80,7 +80,7 @@ public class Server implements Runnable {
 		}
 	}
 	
-	private void send(final byte[] data, InetAddress address, int port) {
+	private void send(final byte[] data, final InetAddress address, final int port) {
 		send = new Thread("Server Send") {
 			public void run() {
 				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
@@ -102,7 +102,7 @@ public class Server implements Runnable {
 			int id = UniqueIdentifier.getIdentifier();
 			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
 			// testing only
-			System.out.println(rcvString.substring(3, rcvString.length()) + " identifier: " + id);
+			System.out.println(rcvString.substring(3, rcvString.length()) + " identifier: " + id + "\n");
 		} else if (rcvString.startsWith("/m/")) {
 			//String message = rcvString.substring(3, rcvString.length());
 			sendToAll(rcvString);
