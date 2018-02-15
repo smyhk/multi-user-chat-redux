@@ -3,6 +3,7 @@ package com.smyhktech.mudchatter.server;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +74,27 @@ public class Server implements Runnable {
 		receive.start();
 	}
 	
+	private void sendToAll(String message) {
+		for (ServerClient client : clients) {
+			send(message.getBytes(), client.address, client.port);
+		}
+	}
+	
+	private void send(final byte[] data, InetAddress address, int port) {
+		send = new Thread("Server Send") {
+			public void run() {
+				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+				try {
+					socket.send(packet);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		send.start();
+	}
+	
 	private void process(DatagramPacket packet) {
 		String rcvString = new String(packet.getData());
 		if (rcvString.startsWith("/c/")) {
@@ -81,8 +103,11 @@ public class Server implements Runnable {
 			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
 			// testing only
 			System.out.println(rcvString.substring(3, rcvString.length()) + " identifier: " + id);
+		} else if (rcvString.startsWith("/m/")) {
+			//String message = rcvString.substring(3, rcvString.length());
+			sendToAll(rcvString);
 		} else {
-			System.out.println(rcvString);  // test rcvd
+			
 		}
 	}
 }
