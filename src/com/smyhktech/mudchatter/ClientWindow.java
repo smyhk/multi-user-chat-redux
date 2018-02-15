@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,8 +24,9 @@ import javax.swing.text.DefaultCaret;
 public class ClientWindow extends JFrame implements Runnable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
 	private JPanel contentPane;
+
 	private JTextField txtMessage;
 	private JTextArea chatHistory;
 	private DefaultCaret caret;
@@ -122,6 +125,14 @@ public class ClientWindow extends JFrame implements Runnable {
 		gbc_btnSend.gridx = 2;
 		gbc_btnSend.gridy = 2;
 		contentPane.add(btnSend, gbc_btnSend);
+		
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				String disconnect = "/d/" + client.getId() + "/e/";
+				send(disconnect);
+			}
+		});
+		
 		setVisible(true);
 		
 		// Automatically give focus to the text entry window
