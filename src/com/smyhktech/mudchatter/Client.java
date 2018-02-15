@@ -28,16 +28,16 @@ import javax.swing.text.DefaultCaret;
 public class Client extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	
-	private String name, address;
-	private int port;
-	private JTextField txtMessage;
-	private JTextArea chatHistory;
-	private DefaultCaret caret;
 	
 	private DatagramSocket socket;
 	private InetAddress ip;
+	private String name, address;
+	private int port;
+	
+	private JPanel contentPane;
+	private JTextField txtMessage;
+	private JTextArea chatHistory;
+	private DefaultCaret caret;
 	
 	private Thread send;
 	
