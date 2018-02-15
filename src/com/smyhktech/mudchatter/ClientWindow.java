@@ -137,8 +137,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		// Ignore blank messages
 		if (message.equals("")) return;
 		message = client.getName() + ": " + message;
-		console(message);
-		
+
 		// Send message to the server
 		message = "/m/" + message;
 		client.send(message.getBytes());
@@ -155,6 +154,9 @@ public class ClientWindow extends JFrame implements Runnable {
 						System.out.println("In window listen: " + message);
 						client.setId(Integer.parseInt(message.split("/c/|/e/")[1]));
 						console("Successfully connected to server. ID: " + client.getId());
+					} else if (message.startsWith("/m/")) {
+						String text = message.split("/m/|/e/")[1];
+						console(text);
 					} else {
 						System.out.println("I am not getting any data!!");
 					}

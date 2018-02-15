@@ -66,7 +66,6 @@ public class Server implements Runnable {
 					process(packet);
 					
 					// Quick test for ServerClient
-					// clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 50));
 					System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
 				}
 			}
@@ -96,6 +95,9 @@ public class Server implements Runnable {
 		send.start();
 	}
 	
+	/**
+	 * Packages the message with delimiters before passing to network send
+	 */
 	private void send(String message, InetAddress address, int port) {
 		// Indicates end of message
 		message += "/e/";
@@ -115,7 +117,7 @@ public class Server implements Runnable {
 			System.out.println("In process method: " + msg);
 			send(msg, packet.getAddress(), packet.getPort());
 		} else if (rcvString.startsWith("/m/")) {
-			//String message = rcvString.substring(3, rcvString.length());
+			// Send message to all connected clients
 			sendToAll(rcvString);
 		} else {
 			
