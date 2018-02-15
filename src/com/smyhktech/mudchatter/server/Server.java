@@ -67,7 +67,7 @@ public class Server implements Runnable {
 					
 					// Quick test for ServerClient
 					// clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 50));
-					// System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
+					System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
 				}
 			}
 		};
@@ -85,6 +85,7 @@ public class Server implements Runnable {
 			public void run() {
 				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
 				try {
+					System.out.println("In byte send: " + packet.getAddress() + " " + packet.getPort());
 					socket.send(packet);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -95,14 +96,24 @@ public class Server implements Runnable {
 		send.start();
 	}
 	
+	private void send(String message, InetAddress address, int port) {
+		// Indicates end of message
+		message += "/e/";
+		System.out.println("In string send: " + message);
+		send(message.getBytes(), address, port);
+	}
+	
 	private void process(DatagramPacket packet) {
 		String rcvString = new String(packet.getData());
 		if (rcvString.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();
 			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
-			// testing only
-			System.out.println(rcvString.substring(3, rcvString.length()) + " identifier: " + id + "\n");
+			
+			// Notify client of successful connection
+			String msg = "/c/" + id;
+			System.out.println("In process method: " + msg);
+			send(msg, packet.getAddress(), packet.getPort());
 		} else if (rcvString.startsWith("/m/")) {
 			//String message = rcvString.substring(3, rcvString.length());
 			sendToAll(rcvString);

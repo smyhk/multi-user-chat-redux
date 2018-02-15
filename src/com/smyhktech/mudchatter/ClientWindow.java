@@ -19,7 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-public class ClientWindow extends JFrame {
+public class ClientWindow extends JFrame implements Runnable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -27,8 +27,10 @@ public class ClientWindow extends JFrame {
 	private JTextField txtMessage;
 	private JTextArea chatHistory;
 	private DefaultCaret caret;
+	private Thread run, listen;
+	private boolean running = false;
 	
-	Client client;
+	private Client client;
 	
 	/**
 	 * Create the frame.
@@ -46,8 +48,11 @@ public class ClientWindow extends JFrame {
 		
 		createWindow();
 		console("Attempting connection to: " + address + ":" + port + ", user: " + name);
-		String connection = "/c/" + name;
+		String connection = "/c/" + name + "/e/";
 		client.send(connection.getBytes());
+		running = true;
+		run = new Thread(this, "Running");
+		run.start();
 	}
 	
 	private void createWindow() {
@@ -123,14 +128,9 @@ public class ClientWindow extends JFrame {
 		txtMessage.requestFocusInWindow();
 	}
 	
-	/**
-	 * Writes to the chat history in the JFrame
-	 * @param message
-	 */
-	public void console(String message) {
-		chatHistory.append(message + "\n\r");
-		// TODO: research this...
-		//chatHistory.setCaretPosition();
+	public void run() {
+		System.out.println("I am in the run method.");
+		listen();
 	}
 	
 	private void send(String message) {
@@ -143,5 +143,34 @@ public class ClientWindow extends JFrame {
 		message = "/m/" + message;
 		client.send(message.getBytes());
 		txtMessage.setText("");
+	}
+	
+	public void listen() {
+		listen = new Thread("Listen") {
+			public void run() {
+				System.out.println("I am listening.");
+				while(running) {
+					String message = client.receive();
+					if (message.startsWith("/c/")) {
+						System.out.println("In window listen: " + message);
+						client.setId(Integer.parseInt(message.split("/c/|/e/")[1]));
+						console("Successfully connected to server. ID: " + client.getId());
+					} else {
+						System.out.println("I am not getting any data!!");
+					}
+				}
+			}
+		};
+		listen.start();
+	}
+	
+	/**
+	 * Writes to the chat history in the JFrame
+	 * @param message
+	 */
+	public void console(String message) {
+		chatHistory.append(message + "\n\r");
+		// TODO: research this...
+		//chatHistory.setCaretPosition();
 	}
 }

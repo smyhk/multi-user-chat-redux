@@ -16,6 +16,8 @@ public class Client {
 	
 	private Thread send;
 	
+	private int id = -1;
+	
 	public Client(String name, String address, int port) {
 		this.name = name;
 		this.address = address;
@@ -39,6 +41,7 @@ public class Client {
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		
 		try {
+			System.out.println("In client recv: " + packet.getData());
 			socket.receive(packet);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -53,6 +56,7 @@ public class Client {
 			public void run() {
 				DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
 				try {
+					System.out.println("In client send: " + packet.getData());
 					socket.send(packet);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -61,6 +65,14 @@ public class Client {
 			}
 		};
 		send.start();
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public String getName() {
