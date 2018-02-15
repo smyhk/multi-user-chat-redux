@@ -60,15 +60,29 @@ public class Server implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					String rcvString = new String(packet.getData());
+					
+					// Interprets the received packet, i.e., connection, data, disconnect...
+					process(packet);
 					
 					// Quick test for ServerClient
-					clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 12345));
+					clients.add(new ServerClient("Temp", packet.getAddress(), packet.getPort(), 50));
 					System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
-					System.out.println(rcvString);
 				}
 			}
 		};
 		receive.start();
+	}
+	
+	private void process(DatagramPacket packet) {
+		String rcvString = new String(packet.getData());
+		if (rcvString.startsWith("/c/")) {
+			// UUID id = UUID.randomUUID();
+			int id = UniqueIdentifier.getIdentifier();
+			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
+			// testing only
+			System.out.println(rcvString.substring(3, rcvString.length()) + " identifier: " + id);
+		} else {
+			System.out.println(rcvString);  // test rcvd
+		}
 	}
 }

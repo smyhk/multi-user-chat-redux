@@ -59,7 +59,7 @@ public class Client extends JFrame {
 		
 		createWindow();
 		console("Attempting connection to: " + address + ":" + port + ", user: " + name);
-		String connection = name + " connected from " + address + ":" + port;
+		String connection = "/c/" + name;
 		send(connection.getBytes());
 	}
 	
@@ -186,6 +186,10 @@ public class Client extends JFrame {
 		txtMessage.setText("");
 	}
 	
+	/**
+	 * Writes to the chat history in the JFrame
+	 * @param message
+	 */
 	public void console(String message) {
 		chatHistory.append(message + "\n\r");
 		// TODO: research this...
