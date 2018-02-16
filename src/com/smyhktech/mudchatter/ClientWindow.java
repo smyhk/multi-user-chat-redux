@@ -169,7 +169,7 @@ public class ClientWindow extends JFrame implements Runnable {
 						client.setId(Integer.parseInt(message.split("/c/|/e/")[1]));
 						console("Successfully connected to server. Client ID: " + client.getId());
 					} else if (message.startsWith("/m/")) {
-						String text = message.split("/m/|/e/")[1];
+						String text = message.substring(3).split("/e/")[0];
 						console(text);
 					} else {
 						System.out.println("I am not getting any data!!");
