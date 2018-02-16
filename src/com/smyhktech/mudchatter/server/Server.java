@@ -55,6 +55,8 @@ public class Server implements Runnable {
 			text = text.split("/")[1];
 			// Enable/disable raw mode
 			if (text.equalsIgnoreCase("raw")) {
+				if (!raw) System.out.println("Raw mode enabled.");
+				else System.out.println("Raw mode disabled.");
 				raw = !raw;
 			} else if (text.equalsIgnoreCase("who")) {
 				System.out.println("Connected Clietns:");
@@ -92,9 +94,26 @@ public class Server implements Runnable {
 						}
 					}
 				}
+			} else if (text.equalsIgnoreCase("quit")) {
+				scanner.close();
+				quit();
+			} else if (text.equalsIgnoreCase("help")) {
+				printHelp();
+			} else {
+				System.out.println("Unknown command!");
+				printHelp();
 			}
-			if (!running) scanner.close();
 		}
+	}
+	
+	private void printHelp() {
+		System.out.println("Hey Admin, here are your commands:");
+		System.out.println("==================================");
+		System.out.println("/raw - enable raw mode.");
+		System.out.println("/who - lists all connected clients.");
+		System.out.println("/kick [<user id> | <username>] - kicks a user off the server.");
+		System.out.println("/help - shows this help menu.");
+		System.out.println("/quit - gracefully shuts down the sever.");
 	}
 	
 	private void manageClients() {
@@ -104,7 +123,7 @@ public class Server implements Runnable {
 					sendToAll("/i/server");
 					sendStatus();
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -146,6 +165,7 @@ public class Server implements Runnable {
 					DatagramPacket packet = new DatagramPacket(data, data.length);
 					try {
 						socket.receive(packet);
+					} catch (SocketException e) {  // Don't display stack trace when closing socket
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -220,6 +240,14 @@ public class Server implements Runnable {
 		} else if (rcvString.startsWith("/i/")) {
 			clientResponse.add(Integer.parseInt(rcvString.split("/i/|/e/")[1]));
 		}
+	}
+	
+	private void quit() {
+		for (int i = 0; i < clients.size(); i++) {
+			disconnect(clients.get(i).getID(), true);
+		}
+		running = false;
+		socket.close();
 	}
 	
 	private void disconnect(int id, boolean status) {
