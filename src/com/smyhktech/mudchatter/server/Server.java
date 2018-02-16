@@ -10,8 +10,12 @@ import java.util.List;
 
 public class Server implements Runnable {
 	
+	protected static final int MAX_ATTEMPTS = 5;
+
 	// Store connected clients
 	private List<ServerClient> clients = new ArrayList<>();
+	
+	private List<Integer> clientResponse = new ArrayList<>();
 	
 	private DatagramSocket socket;
 	private int port;
@@ -42,7 +46,26 @@ public class Server implements Runnable {
 		manage = new Thread("Manage") {
 			public void run() {
 				while(running) {
-					
+					sendToAll("/i/server");
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (!clientResponse.contains(c.getID())) {
+							if (c.attempt >= MAX_ATTEMPTS) {
+								disconnect(c.getID(), false);
+							} else {
+								c.attempt++;
+							}
+						} else {
+							clientResponse.remove(new Integer(c.getID()));
+							c.attempt = 0;
+						}
+					}
 				}
 			}
 		};
@@ -120,6 +143,8 @@ public class Server implements Runnable {
 		} else if (rcvString.startsWith("/d/")) {
 			String id = rcvString.split("/d/|/e/")[1];
 			disconnect(Integer.parseInt(id), true);
+		} else if (rcvString.startsWith("/i/")) {
+			clientResponse.add(Integer.parseInt(rcvString.split("/i/|/e/")[1]));
 		}
 	}
 	

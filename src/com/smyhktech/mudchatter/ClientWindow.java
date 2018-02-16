@@ -171,8 +171,9 @@ public class ClientWindow extends JFrame implements Runnable {
 					} else if (message.startsWith("/m/")) {
 						String text = message.substring(3).split("/e/")[0];
 						console(text);
-					} else {
-						System.out.println("I am not getting any data!!");
+					} else if (message.startsWith("/i/")) {
+						String text = "/i/" + client.getId() + "/e/";
+						send(text, false);
 					}
 				}
 			}
