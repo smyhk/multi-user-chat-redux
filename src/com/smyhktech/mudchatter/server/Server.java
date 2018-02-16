@@ -181,8 +181,8 @@ public class Server implements Runnable {
 	
 	private void sendToAll(String message) {
 		if (message.startsWith("/m/")) {
-			String text = message.substring(3).split("/e/")[0];
-			System.out.println(text);
+			//String text = message.substring(3).split("/e/")[0];
+			System.out.println(message);
 		}
 		
 		for (ServerClient client : clients) {
