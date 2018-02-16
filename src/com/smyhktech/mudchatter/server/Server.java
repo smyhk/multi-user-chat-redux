@@ -64,6 +64,7 @@ public class Server implements Runnable {
 				}
 				System.out.println("=================");
 			}
+			if (!running) scanner.close();
 		}
 	}
 	
@@ -121,7 +122,7 @@ public class Server implements Runnable {
 	private void sendToAll(String message) {
 		if (message.startsWith("/m/")) {
 			String text = message.substring(3).split("/e/")[0];
-			System.out.print(text);
+			System.out.println(text);
 		}
 		
 		for (ServerClient client : clients) {
