@@ -64,9 +64,6 @@ public class Server implements Runnable {
 					
 					// Interprets the received packet, i.e., connection, data, disconnect...
 					process(packet);
-					
-					// Quick test for ServerClient
-					System.out.println(clients.get(0).address.toString() + ":" + clients.get(0).port);
 				}
 			}
 		};
@@ -84,7 +81,6 @@ public class Server implements Runnable {
 			public void run() {
 				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
 				try {
-					System.out.println("In byte send: " + packet.getAddress() + " " + packet.getPort());
 					socket.send(packet);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -101,26 +97,47 @@ public class Server implements Runnable {
 	private void send(String message, InetAddress address, int port) {
 		// Indicates end of message
 		message += "/e/";
-		System.out.println("In string send: " + message);
 		send(message.getBytes(), address, port);
 	}
 	
 	private void process(DatagramPacket packet) {
 		String rcvString = new String(packet.getData());
+		
 		if (rcvString.startsWith("/c/")) {
-			// UUID id = UUID.randomUUID();
+			// UUID id = UUID.randomUUID(); possible alternative client unique id
+			
+			rcvString = rcvString.split("/e/")[0];
 			int id = UniqueIdentifier.getIdentifier();
 			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
 			
 			// Notify client of successful connection
 			String msg = "/c/" + id;
-			System.out.println("In process method: " + msg);
 			send(msg, packet.getAddress(), packet.getPort());
+			
 		} else if (rcvString.startsWith("/m/")) {
 			// Send message to all connected clients
 			sendToAll(rcvString);
-		} else {
-			
+		} else if (rcvString.startsWith("/d/")) {
+			String id = rcvString.split("/d/|/e/")[1];
+			disconnect(Integer.parseInt(id), true);
 		}
+	}
+	
+	private void disconnect(int id, boolean status) {
+		ServerClient c = null;
+		for (int i = 0; i < clients.size(); i++) {
+			if (clients.get(i).getID() == id) {
+				c = clients.get(i);
+				clients.remove(i);
+				break;
+			}
+		}
+		String message = "";
+		if (status) {
+			message = "Client: " + c.name + " (" + c.getID() + ") " +  "@ " + c.address.toString() + ":" + c.port + " disconnected.";
+		} else {
+			message = "Client: " + c.name + " (" + c.getID() + ") " + "@ " + c.address.toString() + ":" + c.port +" timed out.";
+		}
+		System.out.println(message);
 	}
 }

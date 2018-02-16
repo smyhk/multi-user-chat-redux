@@ -101,7 +101,7 @@ public class ClientWindow extends JFrame implements Runnable {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					send(txtMessage.getText());
+					send(txtMessage.getText(), true);
 				}
 			}
 		});
@@ -117,7 +117,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		JButton btnSend = new JButton("Send");
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				send(txtMessage.getText());
+				send(txtMessage.getText(), true);
 			}
 		});
 		GridBagConstraints gbc_btnSend = new GridBagConstraints();
@@ -126,10 +126,13 @@ public class ClientWindow extends JFrame implements Runnable {
 		gbc_btnSend.gridy = 2;
 		contentPane.add(btnSend, gbc_btnSend);
 		
+		// Disconnect client from server when client widow closes
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				String disconnect = "/d/" + client.getId() + "/e/";
-				send(disconnect);
+				send(disconnect, false);
+				client.close();
+				running = false;
 			}
 		});
 		
@@ -140,17 +143,19 @@ public class ClientWindow extends JFrame implements Runnable {
 	}
 	
 	public void run() {
-		System.out.println("I am in the run method.");
 		listen();
 	}
 	
-	private void send(String message) {
+	private void send(String message, boolean text) {
 		// Ignore blank messages
 		if (message.equals("")) return;
-		message = client.getName() + ": " + message;
 
 		// Send message to the server
-		message = "/m/" + message;
+		if (text) {
+			message = client.getName() + ": " + message;
+			message = "/m/" + message;
+		}
+		
 		client.send(message.getBytes());
 		txtMessage.setText("");
 	}
@@ -158,13 +163,11 @@ public class ClientWindow extends JFrame implements Runnable {
 	public void listen() {
 		listen = new Thread("Listen") {
 			public void run() {
-				System.out.println("I am listening.");
 				while(running) {
 					String message = client.receive();
 					if (message.startsWith("/c/")) {
-						System.out.println("In window listen: " + message);
 						client.setId(Integer.parseInt(message.split("/c/|/e/")[1]));
-						console("Successfully connected to server. ID: " + client.getId());
+						console("Successfully connected to server. Client ID: " + client.getId());
 					} else if (message.startsWith("/m/")) {
 						String text = message.split("/m/|/e/")[1];
 						console(text);

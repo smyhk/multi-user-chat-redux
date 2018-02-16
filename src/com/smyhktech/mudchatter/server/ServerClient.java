@@ -20,4 +20,16 @@ public class ServerClient {
 	public int getID() {
 		return ID;
 	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public InetAddress getAddress() {
+		return address;
+	}
+	
+	public int getPort() {
+		return port;
+	}
 }
