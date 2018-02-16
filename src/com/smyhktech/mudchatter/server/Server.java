@@ -52,10 +52,11 @@ public class Server implements Runnable {
 				sendToAll("/m/Server: " + text + "/e/");
 				continue;
 			}
+			text = text.split("/")[1];
 			// Enable/disable raw mode
-			if (text.split("/")[1].equalsIgnoreCase("raw")) {
+			if (text.equalsIgnoreCase("raw")) {
 				raw = !raw;
-			} else if (text.split("/")[1].equalsIgnoreCase("who")) {
+			} else if (text.equalsIgnoreCase("who")) {
 				System.out.println("Connected Clietns:");
 				System.out.println("=================");
 				for (int i = 0; i < clients.size(); i++) {
@@ -63,6 +64,34 @@ public class Server implements Runnable {
 					System.out.println(c.name + " (" + c.getID() + ") " + "@ " + c.address.toString() + ":" + c.port);
 				}
 				System.out.println("=================");
+			} else if (text.startsWith("kick")) {
+				String name = text.split(" ")[1];  // Extract the name or id
+				int id = -1;
+				boolean number = true;
+				try {
+					id = Integer.parseInt(name);
+				} catch (NumberFormatException e) {
+					number = false;
+				}
+				if (number) {
+					boolean exists = false;
+					for (int i = 0; i < clients.size(); i++) {
+						if (clients.get(i).getID() == id) {
+							exists = true;
+							break;
+						}
+					}
+					if (exists) disconnect(id, true);
+					else System.out.println("Client with ID: " + id + " does not exist. Check ID number.");
+				} else {
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (name.equals(c.name)) {
+							disconnect(c.getID(), true);
+							break;
+						}
+					}
+				}
 			}
 			if (!running) scanner.close();
 		}
@@ -161,9 +190,11 @@ public class Server implements Runnable {
 		if (rcvString.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID(); possible alternative client unique id
 			
-			rcvString = rcvString.split("/e/")[0];
+			String name = rcvString.split("/c/|/e/")[1];
 			int id = UniqueIdentifier.getIdentifier();
-			clients.add(new ServerClient(rcvString.substring(3, rcvString.length()), packet.getAddress(), packet.getPort(), id));
+			System.out.println(name + " (" + id + ") connected!"); 
+			
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
 			
 			// Notify client of successful connection
 			String msg = "/c/" + id;
@@ -182,13 +213,16 @@ public class Server implements Runnable {
 	
 	private void disconnect(int id, boolean status) {
 		ServerClient c = null;
+		boolean existed = false;
 		for (int i = 0; i < clients.size(); i++) {
 			if (clients.get(i).getID() == id) {
 				c = clients.get(i);
 				clients.remove(i);
+				existed = true;
 				break;
 			}
 		}
+		if (!existed) return;
 		String message = "";
 		if (status) {
 			message = "Client: " + c.name + " (" + c.getID() + ") " +  "@ " + c.address.toString() + ":" + c.port + " disconnected.";
