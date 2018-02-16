@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server implements Runnable {
 	
@@ -21,6 +22,8 @@ public class Server implements Runnable {
 	private int port;
 	private boolean running = false;
 	private Thread run, manage, send, receive;
+
+	private boolean raw = false;
 	
 	public Server(int port) {
 		this.port = port;
@@ -40,6 +43,28 @@ public class Server implements Runnable {
 		System.out.println("Server started on port " + port);
 		manageClients();
 		receive();
+		
+		// Server commands
+		Scanner scanner = new Scanner(System.in);
+		while (running) {
+			String text = scanner.nextLine();
+			if (!text.startsWith("/")) {
+				sendToAll("/m/Server: " + text + "/e/");
+				continue;
+			}
+			// Enable/disable raw mode
+			if (text.split("/")[1].equalsIgnoreCase("raw")) {
+				raw = !raw;
+			} else if (text.split("/")[1].equalsIgnoreCase("who")) {
+				System.out.println("Connected Clietns:");
+				System.out.println("=================");
+				for (int i = 0; i < clients.size(); i++) {
+					ServerClient c = clients.get(i);
+					System.out.println(c.name + " (" + c.getID() + ") " + "@ " + c.address.toString() + ":" + c.port);
+				}
+				System.out.println("=================");
+			}
+		}
 	}
 	
 	private void manageClients() {
@@ -94,6 +119,11 @@ public class Server implements Runnable {
 	}
 	
 	private void sendToAll(String message) {
+		if (message.startsWith("/m/")) {
+			String text = message.substring(3).split("/e/")[0];
+			System.out.print(text);
+		}
+		
 		for (ServerClient client : clients) {
 			send(message.getBytes(), client.address, client.port);
 		}
@@ -125,6 +155,7 @@ public class Server implements Runnable {
 	
 	private void process(DatagramPacket packet) {
 		String rcvString = new String(packet.getData());
+		if (raw) System.out.println(rcvString);
 		
 		if (rcvString.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID(); possible alternative client unique id

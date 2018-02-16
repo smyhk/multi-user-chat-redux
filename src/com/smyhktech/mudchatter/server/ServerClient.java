@@ -3,6 +3,7 @@ package com.smyhktech.mudchatter.server;
 import java.net.InetAddress;
 
 public class ServerClient {
+	//TODO: consider making these private
 	public String name;
 	public InetAddress address;
 	public int port;
